@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tower Defense Game Maker</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div id="app">
+    <!-- Top Bar -->
+    <header class="topbar">
+      <div class="logo">
+        <span class="logo-icon">🏰</span>
+        <span class="logo-text">TD Maker</span>
+      </div>
+      <div class="game-name-wrap">
+        <label>게임 이름</label>
+        <input type="text" id="gameName" value="My Tower Defense" placeholder="게임 이름 입력" />
+      </div>
+      <div class="top-actions">
+        <button id="btnNew" class="btn btn-ghost" title="새 프로젝트">🆕 새 프로젝트</button>
+        <button id="btnLoad" class="btn btn-ghost" title="불러오기">📂 불러오기</button>
+        <button id="btnSave" class="btn btn-ghost" title="저장">💾 저장</button>
+        <button id="btnPreview" class="btn btn-primary">▶ 미리보기</button>
+        <button id="btnExport" class="btn btn-accent">📦 내보내기</button>
+      </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+      <!-- Sidebar Tabs -->
+      <nav class="sidebar">
+        <button class="nav-item active" data-tab="map">🗺️ 맵 메이커</button>
+        <button class="nav-item" data-tab="tower">🗼 타워 생성기</button>
+        <button class="nav-item" data-tab="enemy">👾 적 생성기</button>
+        <button class="nav-item" data-tab="upgrade">🌳 업그레이드 트리</button>
+        <button class="nav-item" data-tab="difficulty">⚡ 난이도/웨이브</button>
+        <button class="nav-item" data-tab="special">⭐ 특별 난이도</button>
+        <button class="nav-item" data-tab="settings">⚙️ 설정</button>
+        <button class="nav-item" data-tab="templates">📋 템플릿</button>
+      </nav>
+
+      <!-- Content Area -->
+      <main class="content">
+        <!-- MAP MAKER -->
+        <section id="tab-map" class="tab-panel active">
+          <div class="panel-header">
+            <h2>맵 메이커</h2>
+            <div class="panel-tools">
+              <label>가로 <input type="number" id="mapWidth" value="20" min="8" max="40" /></label>
+              <label>세로 <input type="number" id="mapHeight" value="15" min="8" max="30" /></label>
+              <button id="btnResizeMap" class="btn btn-sm">크기 적용</button>
+              <button id="btnClearMap" class="btn btn-sm btn-danger">전체 지우기</button>
+            </div>
+          </div>
+          <div class="map-editor-layout">
+            <div class="tile-palette">
+              <h3>타일 팔레트</h3>
+              <div class="palette-grid" id="tilePalette"></div>
+              <div class="brush-size">
+                <label>브러시 크기</label>
+                <input type="range" id="brushSize" min="1" max="5" value="1" />
+                <span id="brushSizeVal">1</span>
+              </div>
+              <div class="map-info">
+                <p>좌클릭: 칠하기 / 우클릭: 지우기</p>
+                <p>스폰(초록)과 엔드(빨강)를 반드시 배치하세요.</p>
+              </div>
+            </div>
+            <div class="map-canvas-wrap">
+              <canvas id="mapCanvas"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- TOWER GENERATOR -->
+        <section id="tab-tower" class="tab-panel">
+          <div class="panel-header">
+            <h2>타워 생성기</h2>
+            <button id="btnAddTower" class="btn btn-primary btn-sm">+ 새 타워</button>
+          </div>
+          <div class="editor-layout">
+            <div class="list-panel">
+              <div id="towerList" class="item-list"></div>
+            </div>
+            <div class="detail-panel" id="towerDetail">
+              <p class="placeholder">타워를 선택하거나 새로 만드세요.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ENEMY GENERATOR -->
+        <section id="tab-enemy" class="tab-panel">
+          <div class="panel-header">
+            <h2>적 생성기</h2>
+            <button id="btnAddEnemy" class="btn btn-primary btn-sm">+ 새 적</button>
+          </div>
+          <div class="editor-layout">
+            <div class="list-panel">
+              <div id="enemyList" class="item-list"></div>
+            </div>
+            <div class="detail-panel" id="enemyDetail">
+              <p class="placeholder">적을 선택하거나 새로 만드세요.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- UPGRADE TREE -->
+        <section id="tab-upgrade" class="tab-panel">
+          <div class="panel-header">
+            <h2>업그레이드 트리</h2>
+            <div class="panel-tools">
+              <select id="upgradeTowerSelect"></select>
+              <button id="btnAddUpgradeNode" class="btn btn-sm">+ 노드 추가</button>
+              <button id="btnClearTree" class="btn btn-sm btn-danger">트리 초기화</button>
+            </div>
+          </div>
+          <div class="upgrade-layout">
+            <div class="upgrade-canvas-wrap">
+              <canvas id="upgradeCanvas"></canvas>
+            </div>
+            <div class="upgrade-sidebar" id="upgradeNodeDetail">
+              <p class="placeholder">노드를 선택하세요.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- DIFFICULTY / WAVES -->
+        <section id="tab-difficulty" class="tab-panel">
+          <div class="panel-header">
+            <h2>난이도 & 웨이브 생성기</h2>
+            <button id="btnAddWave" class="btn btn-primary btn-sm">+ 웨이브 추가</button>
+          </div>
+          <div class="difficulty-layout">
+            <div class="diff-settings">
+              <h3>기본 난이도 설정</h3>
+              <label>시작 골드 <input type="number" id="startGold" value="500" min="0" /></label>
+              <label>시작 라이프 <input type="number" id="startLives" value="20" min="1" /></label>
+              <label>웨이브 간 대기(초) <input type="number" id="waveInterval" value="5" min="1" step="0.5" /></label>
+              <label>적 체력 배율 <input type="number" id="hpScale" value="1.0" min="0.1" step="0.1" /></label>
+              <label>적 속도 배율 <input type="number" id="speedScale" value="1.0" min="0.1" step="0.1" /></label>
+              <label>보상 배율 <input type="number" id="rewardScale" value="1.0" min="0.1" step="0.1" /></label>
+            </div>
+            <div class="wave-list-wrap">
+              <h3>웨이브 목록</h3>
+              <div id="waveList" class="wave-list"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SPECIAL DIFFICULTY -->
+        <section id="tab-special" class="tab-panel">
+          <div class="panel-header">
+            <h2>특별 난이도</h2>
+            <button id="btnAddSpecial" class="btn btn-primary btn-sm">+ 특별 난이도 추가</button>
+          </div>
+          <div class="editor-layout">
+            <div class="list-panel">
+              <div id="specialList" class="item-list"></div>
+            </div>
+            <div class="detail-panel" id="specialDetail">
+              <p class="placeholder">특별 난이도를 선택하거나 새로 만드세요.<br/>클리어 시 특수 타워를 지급하고, 전용 맵·난이도로 고정됩니다.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SETTINGS -->
+        <section id="tab-settings" class="tab-panel">
+          <div class="panel-header">
+            <h2>게임 설정</h2>
+          </div>
+          <div class="settings-grid">
+            <div class="setting-card">
+              <h3>기본 정보</h3>
+              <label>제작자 <input type="text" id="authorName" value="Anonymous" /></label>
+              <label>버전 <input type="text" id="gameVersion" value="1.0.0" /></label>
+              <label>설명 <textarea id="gameDesc" rows="3" placeholder="게임 설명"></textarea></label>
+            </div>
+            <div class="setting-card">
+              <h3>플레이 설정</h3>
+              <label>타일 크기(px) <input type="number" id="tileSize" value="40" min="20" max="64" /></label>
+              <label>최대 타워 수 <input type="number" id="maxTowers" value="50" min="10" /></label>
+              <label><input type="checkbox" id="allowSell" checked /> 타워 판매 허용</label>
+              <label><input type="checkbox" id="showPath" checked /> 경로 미리보기</label>
+            </div>
+            <div class="setting-card">
+              <h3>시각/효과</h3>
+              <label>배경색 <input type="color" id="bgColor" value="#1a1a2e" /></label>
+              <label>경로색 <input type="color" id="pathColor" value="#4a4a6a" /></label>
+              <label><input type="checkbox" id="enableParticles" checked /> 파티클 효과</label>
+              <label><input type="checkbox" id="enableSound" /> 사운드 (실험적)</label>
+            </div>
+          </div>
+        </section>
+
+        <!-- TEMPLATES -->
+        <section id="tab-templates" class="tab-panel">
+          <div class="panel-header">
+            <h2>템플릿</h2>
+          </div>
+          <div class="templates-grid" id="templatesGrid">
+            <!-- filled by JS -->
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Status Bar -->
+    <footer class="statusbar">
+      <span id="statusText">준비됨</span>
+      <span id="projectInfo">타워 0 · 적 0 · 웨이브 0</span>
+    </footer>
+  </div>
+
+  <!-- Modals -->
+  <div id="modalOverlay" class="modal-overlay hidden">
+    <div class="modal" id="modalContent"></div>
+  </div>
+
+  <!-- Preview Modal -->
+  <div id="previewOverlay" class="modal-overlay hidden">
+    <div class="preview-modal">
+      <div class="preview-header">
+        <h2>게임 미리보기</h2>
+        <button id="btnClosePreview" class="btn btn-ghost">✕ 닫기</button>
+      </div>
+      <div class="preview-body">
+        <canvas id="previewCanvas"></canvas>
+        <div class="preview-hud">
+          <div>💰 <span id="pGold">0</span></div>
+          <div>❤️ <span id="pLives">0</span></div>
+          <div>🌊 <span id="pWave">0</span></div>
+          <div class="preview-controls">
+            <button id="btnStartWave" class="btn btn-sm btn-primary">다음 웨이브</button>
+            <button id="btnPausePreview" class="btn btn-sm">일시정지</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export Modal -->
+  <div id="exportOverlay" class="modal-overlay hidden">
+    <div class="modal export-modal">
+      <h2>내보내기</h2>
+      <div class="export-options">
+        <button id="btnDownloadJSON" class="btn btn-primary">📄 프로젝트 JSON 다운로드</button>
+        <button id="btnDownloadHTML" class="btn btn-accent">🌐 플레이 가능 HTML 다운로드</button>
+        <button id="btnCopyCode" class="btn btn-ghost">📋 코드 복사</button>
+      </div>
+      <textarea id="exportCode" readonly rows="12" placeholder="내보낸 코드가 여기에 표시됩니다..."></textarea>
+      <button id="btnCloseExport" class="btn btn-ghost" style="margin-top:12px">닫기</button>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
